@@ -18,18 +18,17 @@ const storage = new Storage({
     projectId: config.cloud_project_id
 });
 
-const video = require('@google-cloud/video-intelligence');
+const video = require('@google-cloud/video-intelligence').v1;
 const client = new video.VideoIntelligenceServiceClient({
     projectId: config.cloud_project_id,
     keyfileName: './keyfile.json'
 });
 
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const ffmpeg = require('fluent-ffmpeg');
-const path = require('path');
-const binPath = path.resolve(__dirname, 'ffmpeg');
-const ffmpegPath = path.resolve(binPath, 'ffmpeg');
-const ffprobePath = path.resolve(binPath, 'ffprobe');
 const rimraf = require('rimraf');
+
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
@@ -75,7 +74,7 @@ exports.analyzeVideo = function analyzeVideo (event, callback) {
             const request = {
                 inputUri: "gs://" + bucketName + '/' + fileName,
                 outputUri: "gs://ga-demo-json/" + fileName.replace(".", "").replace("/", "") + ".json",
-                features: ['LABEL_DETECTION', 'SHOT_CHANGE_DETECTION']
+                features: ['LABEL_DETECTION', 'SHOT_CHANGE_DETECTION'],
             }
 
             client.annotateVideo(request)
